@@ -44,6 +44,7 @@ implements KlickReagierbar, KollisionsReagierbar {
     public static final int FIELD_DEPTH = 400;
 
     public static void main(String[] args) {
+        //System.setProperty("sun.java2d.trace","log,timestamp,count,out:j2dlog.txt,verbose");
         new PhysicsSandbox();
     }
 
@@ -74,7 +75,7 @@ implements KlickReagierbar, KollisionsReagierbar {
     private boolean hatSchwerkraft = false;
 
     public PhysicsSandbox() {
-        super(612, 450, "Physics Sandbox");
+        super(612, 450 , "Physics Sandbox", true, true);
         //ppmSetzen(30);
     }
 
@@ -121,6 +122,18 @@ implements KlickReagierbar, KollisionsReagierbar {
                 ground.physik.elastizitaet(ground.physik.elastizitaet() - 0.1f);
                 System.out.println("Ela der Wand " + ground.physik.elastizitaet());
                 break;
+            case Taste._1: //Zoom Out
+                kamera.zoomSetzen(kamera.getZoom()-0.1f);
+                break;
+            case Taste._2: //Zoom In
+                kamera.zoomSetzen(kamera.getZoom()+0.1f);
+                break;
+            case Taste.Z:
+                System.out.println("Zoom: " + kamera.getZoom());
+                break;
+            case Taste.P:
+                kamera.verschieben(new Vektor(50, 50));
+                break;
         }
     }
 
@@ -137,7 +150,7 @@ implements KlickReagierbar, KollisionsReagierbar {
     public void initialisieren() {
 
         //Info-Message
-        fenster.nachrichtSchicken("Elastizität +[W]/-[Q] | Masse +[U] / -[J] | [R]eset | [S]chwerkraft | [E]insperren");
+        //fenster.nachrichtSchicken("Elastizität +[W]/-[Q] | Masse +[U] / -[J] | [R]eset | [S]chwerkraft | [E]insperren");
 
         //Test-Objekte
         Rechteck rechteck = new Rechteck(10, 10, 100, 60);
@@ -208,6 +221,8 @@ implements KlickReagierbar, KollisionsReagierbar {
         maus.standardCursorSetzen(Maus.TYP_FADENKREUZ);
         maus.klickReagierbarAnmelden(this);
 
+
+        kamera.zoomSetzen(2);
         resetSituation();
     }
 
