@@ -37,7 +37,7 @@ extends Game {
         Rechteck ro = new Rechteck(ABSTAND_RECHTS, ABSTAND_OBEN, 50, 150);
         Rechteck rm = new Rechteck(ABSTAND_RECHTS+14, ABSTAND_OBEN+120, 50, 200);
         Rechteck lu = new Rechteck(ABSTAND_LINKS+125, ABSTAND_OBEN+255, 50, 120);
-        Rechteck ru = new Rechteck(ABSTAND_LINKS+304, ABSTAND_OBEN+255, 50, 120);
+        Rechteck ru = new Rechteck(ABSTAND_LINKS+304, ABSTAND_OBEN+260, 50, 120);
         boden = new Rechteck(ABSTAND_LINKS+125,ABSTAND_OBEN+375, 230, 40);
 
         Rechteck[] alleRechtecke = new Rechteck[] {
@@ -50,7 +50,7 @@ extends Game {
             r.physik.typ(Physik.Typ.STATISCH);
         }
 
-        lm.physik.schwerkraft(new Vektor(0,4));
+        lm.physik.schwerkraft(new Vektor(0,15));
 
         lm.position.rotation(-(float)Math.PI/4);
         rm.position.rotation((float)Math.PI/4);
@@ -63,7 +63,7 @@ extends Game {
                 wurzel.add(marble);
                 marble.physik.typ(Physik.Typ.DYNAMISCH);
                 marble.position.set(new Punkt(ABSTAND_LINKS+200, ABSTAND_OBEN-150));
-                marble.physik.impulsWirken(new Vektor(Zufall.zFloat()*400-200,Zufall.zFloat()*-500));
+                marble.physik.impulsWirken(new Vektor(Zufall.zFloat()*200-100,Zufall.zFloat()*-300-100));
             }
         }, 500);
 
@@ -91,13 +91,13 @@ extends Game {
 
     /**
      * Erstellt eine neue Murmel.
-     * @return eine Murmel. Farbe, Masse und Größe variieren.
+     * @return eine Murmel. Farbe und Größe variieren.
      */
     public Kreis makeAMarble() {
 
         Kreis murmel = new Kreis(0,0, Zufall.zInt(50)+10);
         murmel.physik.typ(Physik.Typ.DYNAMISCH);
-        murmel.physik.masse(Zufall.zFloat()*2+2);
+        murmel.physik.masse(4);
         murmel.farbeSetzen(new Farbe(
                 Zufall.zInt(255), Zufall.zInt(255), Zufall.zInt(255)));
 

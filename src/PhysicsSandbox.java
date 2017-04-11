@@ -7,7 +7,7 @@ import ea.*;
  */
 public class PhysicsSandbox
 extends Game
-implements KlickReagierbar, KollisionsReagierbar {
+implements KlickReagierbar {
 
     /**
      * Textbox für Infos
@@ -215,7 +215,20 @@ implements KlickReagierbar, KollisionsReagierbar {
 
         //Test-Objekte zur Kollision Anmelden
         for(int i = 0; i < testObjects.length; i++) {
-            anmelden.kollisionsReagierbar(this, attack, testObjects[i], i);
+            final int key = i;
+            KollisionsReagierbar kr = new KollisionsReagierbar() {
+                @Override
+                public void kollision(Raum colliding) {
+                    isInAttackRange[lastAttackTarget = key] = true;
+                }
+
+                @Override
+                public void kollisionBeendet(Raum collider) {
+                    //Code = index d. Test-Objekts, das attack-range verlassen hat.
+                    isInAttackRange[key] = false;
+                }
+            };
+            anmelden.kollisionsReagierbar(kr, attack, testObjects[i]);
         }
 
 
@@ -277,7 +290,7 @@ implements KlickReagierbar, KollisionsReagierbar {
 
                 for(int i = 0; i < testObjects.length; i++) {
                     if(isInAttackRange[i])
-                        testObjects[i].physik.kraftWirken(distance.multiplizieren(200), lastAttack);
+                        testObjects[i].physik.impulsWirken(distance.multiplizieren(10), lastAttack);
                 }
                 
 
@@ -287,17 +300,8 @@ implements KlickReagierbar, KollisionsReagierbar {
         }
     }
 
-    @Override
-    public void kollision(int code) {
-        //Code = index d. Test-Objekts, das in attack-range ist.
-        isInAttackRange[lastAttackTarget = code] = true;
-    }
 
-    @Override
-    public void kollisionBeendet(int code) {
-        //Code = index d. Test-Objekts, das attack-range verlassen hat.
-        isInAttackRange[code] = false;
-    }
+
 
     @Override
     public void frameUpdate(float ts) {
