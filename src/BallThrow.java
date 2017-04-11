@@ -93,7 +93,7 @@ implements KollisionsReagierbar {
         boden.physik.typ(Physik.Typ.STATISCH);
 
         //Kollision zwischen Ball und Boden beobachten (Code ist uns egal, wir kennen nur einen Kollisionsfall)
-        anmelden.kollisionsReagierbar(this, ball, boden, 0);
+        anmelden.kollisionsReagierbar(this, ball, boden);
     }
 
     /**
@@ -151,10 +151,10 @@ implements KollisionsReagierbar {
     /**
      * Wird bei jeder Kollision zwischen <b>mit diesem Interface angemeldeten</b> <code>Raum</code>-Objekten
      * aufgerufen.
-     * @param code  Der Code der Kollision (ist in unserem Fall immer 0, haben wir so angegeben)
+     * @param colliding  Das Kollidierende Objekt
      */
     @Override
-    public void kollision(int code) {
+    public void kollision(Raum colliding) {
         //Kollision bedeutet, dass der Ball auf den Boden gefallen ist => Zeitmessung abschließen
         long endzeit = System.currentTimeMillis();
         long zeitdifferenz = endzeit-startzeit;
@@ -166,10 +166,5 @@ implements KollisionsReagierbar {
         System.out.println("Der Ball ist auf dem Boden aufgeschlagen. Seit Simulationsstart sind " +
          + (zeitdifferenz/1000) + " Sekunden und " + (zeitdifferenz%1000) + " Millisekunden vergangen.\n" +
                 "Der Ball diese Distanz zurückgelegt: " + distanz + " m");
-    }
-
-    @Override
-    public void kollisionBeendet(int code) {
-        //Interessiert uns hier nicht. Ist im Interface definiert, muss also mit implementiert werden.
     }
 }

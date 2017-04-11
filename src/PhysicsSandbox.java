@@ -3,6 +3,23 @@ import ea.*;
 /**
  * Eine kleine Sandbox, in der man ein paar Grundfunktionen der EA-Physik (4.0) ausprobieren kann.
  *
+ * <h3>Nutzung der Simulation</h3>
+ * <p>Die Simulation wird mit der Maus beeinflusst. Klicken setzt einen Angriffspunkt. Ein weiteres Klicken wirkt
+ * an dem Angriffspunkt einen Impuls. Stärke und Richtung hängen von der Position der Maus relativ zum ersten Punkt
+ * ab. Der entsprechende Vektor ist sichtbar.</p>
+ * <h3>Funktionen</h3>
+ * <ul>
+ *     <li>R Setzt die gesamte Simulation zurück. Alle Objekte verharren wieder in Ruhe an ihrer Ausgangsposition.</li>
+ *     <li>S Aktiviert/Deaktiviert Schwerkraft in der Simulation.</li>
+ *     <li>E Aktiviert/Deaktiviert Wände</li>
+ *     <li>D Aktiviert/Deaktiviert den Debug-Modus (und stellt damit ein Raster, FPS etc. dar)</li>
+ *     <li>I Aktiviert/Deaktiviert die Info-Box mit Infos zu den physikalischen Eigenschaften des zuletzt
+ *     angeklickten Objekts.</li>
+ *     <li>U und J erhöhen/reduzieren die Masse des zuöetzt angeklickten Objekts.</li>
+ *     <li>W und Q erhöhen/reduzieren die Elastizität der Wände.</li>
+ *     <li>1 und 2 zoomen rein/raus</li>
+ * </ul>
+ *
  * Created by andonie on 05.09.15.
  */
 public class PhysicsSandbox
@@ -41,26 +58,49 @@ implements KlickReagierbar {
         }
     }
 
-    private static final Vektor SCHWERKRAFT = new Vektor(0, 9.81f);
-    public static final int FIELD_WIDTH = 612;
-    public static final int FIELD_DEPTH = 400;
+    /**
+     * Wird für die Schwerkraft-Berechnung genutzt
+     */
+    private static final Vektor ERDBESCHLEUNIGUNG = new Vektor(0, 9.81f);
 
+    /**
+     * Beschreiben die Maße des "Spielfelds"
+     */
+    public static final int FIELD_WIDTH = 612, FIELD_DEPTH = 400;
+
+    /**
+     * Main-Methode startet die Sandbox.
+     * @param args  Comman-Line-Arguments. Nicht relevant.
+     */
     public static void main(String[] args) {
         //System.setProperty("sun.java2d.trace","log,timestamp,count,out:j2dlog.txt,verbose");
         new PhysicsSandbox();
     }
 
+    /**
+     * Die Startpunkte für die Test-Objekte
+     */
     private static final Punkt[] STARTINGPOINTS = new Punkt[] {
             new Punkt(260, 250),
             new Punkt(50, 60),
             new Punkt(400, 100)
     };
 
-    private static enum KlickMode {
+    /**
+     * Beschreibt die Zustände, in denen sich die Sandbox im Bezug auf Mausklick-Funktion befinden kann.
+     */
+    private enum KlickMode {
         ATTACK_POINT, DIRECTION_INTENSITY;
     }
 
+    /**
+     * Beschreibt, ob das Test-Objekt mit dem jeweiligen Index gerade im Angriffspunkt liegt.
+     */
     private boolean[] isInAttackRange = new boolean[3];
+
+    /**
+     * Der Index des zuletzt angeklickten Test-Objekts
+     */
     private int lastAttackTarget = 0;
 
     private Raum[] testObjects = new Raum[3];
@@ -76,78 +116,17 @@ implements KlickReagierbar {
     private Punkt lastAttack;
     private boolean hatSchwerkraft = false;
 
+    /**
+     * Startet ein Sandbox-Fenster.
+     */
     public PhysicsSandbox() {
         super(612, 450 , "Physics Sandbox", true, true);
         //ppmSetzen(30);
     }
 
-
-    @Override
-    public void tasteReagieren(int code) {
-        switch(code) {
-            case Taste.R: //RESET
-                resetSituation();
-                break;
-            case Taste.S: //SCHWERKRAFT-TOGGLE
-                hatSchwerkraft = !hatSchwerkraft;
-                for(Raum testObject : testObjects) {
-                    testObject.physik.schwerkraft(hatSchwerkraft ? SCHWERKRAFT : Vektor.NULLVEKTOR);
-                }
-                //System.out.println("Schwerkraft: " + hatSchwerkraft + " - ");
-                break;
-            case Taste.E: //Toggle Environment
-                boolean wasActive = walls[1].sichtbar();
-                Physik.Typ newType = wasActive ? Physik.Typ.PASSIV : Physik.Typ.STATISCH;
-                //System.out.println("Type = " + newType);
-                for(int i = 1; i <= 3; i++) {
-                    walls[i].sichtbarSetzen(!wasActive);
-                    walls[i].physik.typ(newType);
-                }
-                break;
-            case Taste.I: //Toggle Info Box
-                box.sichtbarSetzen(!box.sichtbar());
-                break;
-            case Taste.D: //Toggle Debug
-                EngineAlpha.setDebug(!EngineAlpha.isDebug());
-                break;
-            case Taste.U: //Increase Mass
-                changeMass(10);
-                break;
-            case Taste.J: //Decrease Mass
-                changeMass(-10);
-                break;
-            case Taste.W: //Elastizitaet der Wände erhöhen
-                ground.physik.elastizitaet(ground.physik.elastizitaet() + 0.1f);
-                System.out.println("Ela der Wand " + ground.physik.elastizitaet());
-                break;
-            case Taste.Q: //Elastizitaet der Wände erhöhen
-                ground.physik.elastizitaet(ground.physik.elastizitaet() - 0.1f);
-                System.out.println("Ela der Wand " + ground.physik.elastizitaet());
-                break;
-            case Taste._1: //Zoom Out
-                kamera.zoomSetzen(kamera.getZoom()-0.1f);
-                break;
-            case Taste._2: //Zoom In
-                kamera.zoomSetzen(kamera.getZoom()+0.1f);
-                break;
-            case Taste.Z:
-                System.out.println("Zoom: " + kamera.getZoom());
-                break;
-            case Taste.P:
-                kamera.verschieben(new Vektor(50, 50));
-                break;
-        }
-    }
-
     /**
-     * Ändert die Masse vom letzten Objekt, was im Attack-Punkt war/ist.
-     * @param deltaM Die Masseänderung (positiv=mehr Masse, negativ=weniger Masse).
+     * In dieser Methode wird die gesamte Sandbox initialisiert.
      */
-    private void changeMass(int deltaM) {
-        testObjects[lastAttackTarget].physik.masse(
-                testObjects[lastAttackTarget].physik.masse()+deltaM);
-    }
-
     @Override
     public void initialisieren() {
 
@@ -221,7 +200,6 @@ implements KlickReagierbar {
                 public void kollision(Raum colliding) {
                     isInAttackRange[lastAttackTarget = key] = true;
                 }
-
                 @Override
                 public void kollisionBeendet(Raum collider) {
                     //Code = index d. Test-Objekts, das attack-range verlassen hat.
@@ -241,6 +219,9 @@ implements KlickReagierbar {
         resetSituation();
     }
 
+    /**
+     * Setzt den Zustand der Sandbox zurück zur Ausgangsaufstellung.
+     */
     private void resetSituation() {
         //Testobjekt zurücksetzen und in Ruhezustand bringen.
         for(int i = 0; i < testObjects.length; i++) {
@@ -259,7 +240,81 @@ implements KlickReagierbar {
     }
 
 
+    /**
+     * Wird bei jedem Tastendruck aufgerufen.
+     * @param code  Der Code der gedrückten Taste.
+     */
+    @Override
+    public void tasteReagieren(int code) {
+        switch(code) {
+            case Taste.R: //RESET
+                resetSituation();
+                break;
+            case Taste.S: //SCHWERKRAFT-TOGGLE
+                hatSchwerkraft = !hatSchwerkraft;
+                for(Raum testObject : testObjects) {
+                    testObject.physik.schwerkraft(hatSchwerkraft ?
+                            ERDBESCHLEUNIGUNG.multiplizieren(testObject.physik.masse()) : Vektor.NULLVEKTOR);
+                }
+                //System.out.println("Schwerkraft: " + hatSchwerkraft + " - ");
+                break;
+            case Taste.E: //Toggle Environment
+                boolean wasActive = walls[1].sichtbar();
+                Physik.Typ newType = wasActive ? Physik.Typ.PASSIV : Physik.Typ.STATISCH;
+                //System.out.println("Type = " + newType);
+                for(int i = 1; i <= 3; i++) {
+                    walls[i].sichtbarSetzen(!wasActive);
+                    walls[i].physik.typ(newType);
+                }
+                break;
+            case Taste.I: //Toggle Info Box
+                box.sichtbarSetzen(!box.sichtbar());
+                break;
+            case Taste.D: //Toggle Debug
+                EngineAlpha.setDebug(!EngineAlpha.isDebug());
+                break;
+            case Taste.U: //Increase Mass
+                changeMass(10);
+                break;
+            case Taste.J: //Decrease Mass
+                changeMass(-10);
+                break;
+            case Taste.W: //Elastizitaet der Wände erhöhen
+                ground.physik.elastizitaet(ground.physik.elastizitaet() + 0.1f);
+                System.out.println("Ela der Wand " + ground.physik.elastizitaet());
+                break;
+            case Taste.Q: //Elastizitaet der Wände erhöhen
+                ground.physik.elastizitaet(ground.physik.elastizitaet() - 0.1f);
+                System.out.println("Ela der Wand " + ground.physik.elastizitaet());
+                break;
+            case Taste._1: //Zoom Out
+                kamera.zoomSetzen(kamera.getZoom()-0.1f);
+                break;
+            case Taste._2: //Zoom In
+                kamera.zoomSetzen(kamera.getZoom()+0.1f);
+                break;
+            case Taste.Z:
+                System.out.println("Zoom: " + kamera.getZoom());
+                break;
+            case Taste.P:
+                kamera.verschieben(new Vektor(50, 50));
+                break;
+        }
+    }
 
+    /**
+     * Ändert die Masse vom letzten Objekt, was im Attack-Punkt war/ist.
+     * @param deltaM Die Masseänderung (positiv=mehr Masse, negativ=weniger Masse).
+     */
+    private void changeMass(int deltaM) {
+        testObjects[lastAttackTarget].physik.masse(
+                testObjects[lastAttackTarget].physik.masse()+deltaM);
+    }
+
+    /**
+     * Wird bei jedem Mausklick aufgerufen.
+     * @param p Punkt des Mausklicks auf der Zeichenebene.
+     */
     @Override
     public void klickReagieren(Punkt p) {
         switch(klickMode) {
@@ -300,9 +355,10 @@ implements KlickReagierbar {
         }
     }
 
-
-
-
+    /**
+     * Wird jeden Frame des Spiels exakt einmal aufgerufen.
+     * @param ts    Die Zeit in Sekunden, die seit dem letzten Frame-Update vergangen sind.
+     */
     @Override
     public void frameUpdate(float ts) {
         //Visualisiere ggf. die Vektorstange
@@ -318,8 +374,6 @@ implements KlickReagierbar {
                 rot = (float)( Math.PI*2 - rot);
             stange.position.rotation(rot);
         }
-
-
 
         //Update für die Textbox
         Vektor vel = testObjects[lastAttackTarget].physik.geschwindigkeit();
