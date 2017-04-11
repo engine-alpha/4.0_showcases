@@ -1,6 +1,8 @@
 import ea.*;
 
 /**
+ * Eine kleine Sandbox, in der man ein paar Grundfunktionen der EA-Physik (4.0) ausprobieren kann.
+ *
  * Created by andonie on 05.09.15.
  */
 public class PhysicsSandbox
