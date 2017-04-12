@@ -26,6 +26,7 @@ public class PhysicsSandbox
 extends Game
 implements KlickReagierbar {
 
+
     /**
      * Textbox für Infos
      */
@@ -39,7 +40,7 @@ implements KlickReagierbar {
             super();
             box = new Rechteck(0,0, 150, 100);
             add(box);
-            box.farbeSetzen(new Farbe(200, 200, 200, 100));
+            box.setColor(new Farbe(200, 200, 200, 100));
 
             texte = new Text[5];
             for(int i = 0; i < texte.length; i++) {
@@ -69,12 +70,18 @@ implements KlickReagierbar {
     public static final int FIELD_WIDTH = 612, FIELD_DEPTH = 400;
 
     /**
+     * Beschreibt die Anzahl an Test-Objekten im Spiel
+     */
+    private static final int NUMER_OF_TESTOBJECTS = 4;
+
+    /**
      * Main-Methode startet die Sandbox.
      * @param args  Comman-Line-Arguments. Nicht relevant.
      */
     public static void main(String[] args) {
         //System.setProperty("sun.java2d.trace","log,timestamp,count,out:j2dlog.txt,verbose");
         new PhysicsSandbox();
+        EngineAlpha.setVerbose(true);
     }
 
     /**
@@ -83,7 +90,8 @@ implements KlickReagierbar {
     private static final Punkt[] STARTINGPOINTS = new Punkt[] {
             new Punkt(260, 250),
             new Punkt(50, 60),
-            new Punkt(400, 100)
+            new Punkt(400, 100),
+            new Punkt(50, 200)
     };
 
     /**
@@ -96,17 +104,17 @@ implements KlickReagierbar {
     /**
      * Beschreibt, ob das Test-Objekt mit dem jeweiligen Index gerade im Angriffspunkt liegt.
      */
-    private boolean[] isInAttackRange = new boolean[3];
+    private boolean[] isInAttackRange = new boolean[NUMER_OF_TESTOBJECTS];
 
     /**
      * Der Index des zuletzt angeklickten Test-Objekts
      */
     private int lastAttackTarget = 0;
 
-    private Raum[] testObjects = new Raum[3];
+    private Raum[] testObjects = new Raum[NUMER_OF_TESTOBJECTS];
     private Raum ground;
     private Raum attack;
-    private Geometrie[] walls = new Geometrie[4];
+    private Geometrie[] walls = new Geometrie[NUMER_OF_TESTOBJECTS];
 
 
     private Rechteck stange;
@@ -136,26 +144,33 @@ implements KlickReagierbar {
         //Test-Objekte
         Rechteck rechteck = new Rechteck(10, 10, 100, 60);
         wurzel.add(rechteck);
-        rechteck.farbeSetzen("Gelb");
+        rechteck.setColor("Gelb");
         rechteck.physik.typ(Physik.Typ.DYNAMISCH);
         testObjects[0] = rechteck;
 
         Kreis kreis = new Kreis(10, 10, 50);
         wurzel.add(kreis);
-        kreis.farbeSetzen("Lila");
+        kreis.setColor("Lila");
         kreis.physik.typ(Physik.Typ.DYNAMISCH);
         testObjects[1] = kreis;
 
         Kreis kreis2 = new Kreis(10,10, 20);
         wurzel.add(kreis2);
-        kreis2.farbeSetzen("gruen");
+        kreis2.setColor("gruen");
         kreis2.physik.typ(Physik.Typ.DYNAMISCH);
         testObjects[2] = kreis2;
+
+        Polygon polygon = new Polygon(new Punkt(0,0), new Punkt(20, 30), new Punkt(10, 50),
+                new Punkt(80, 10));
+        wurzel.add(polygon);
+        polygon.setColor("blau");
+        polygon.physik.typ(Physik.Typ.DYNAMISCH);
+        testObjects[3] = polygon;
 
         //Boden
         Rechteck boden = new Rechteck(0, FIELD_DEPTH, FIELD_WIDTH, 10);
         wurzel.add(boden);
-        boden.farbeSetzen("Weiss");
+        boden.setColor("Weiss");
         boden.physik.typ(Physik.Typ.STATISCH);
         ground = walls[0] = boden;
 
@@ -169,7 +184,7 @@ implements KlickReagierbar {
         walls[3] = oben;
 
         for(int i = 1; i <= 3; i++) {
-            walls[i].farbeSetzen("weiss");
+            walls[i].setColor("weiss");
             walls[i].sichtbarSetzen(false);
             walls[i].physik.typ(Physik.Typ.PASSIV);
         }
@@ -178,14 +193,16 @@ implements KlickReagierbar {
         //Vektor-Visualisierung
         Rechteck stab = new Rechteck(0,0, 100, 5);
         wurzel.add(stab);
-        stab.farbeSetzen(new Farbe(200, 50, 50));
+        stab.setColor(new Farbe(200, 50, 50));
         stange = stab;
+        stange.zIndexSetzen(3);
 
         //Attack-Visualisierung
         Kreis atv = new Kreis(0,0, 10);
         wurzel.add(atv);
-        atv.farbeSetzen("Rot");
+        atv.setColor("Rot");
         attack = atv;
+        attack.zIndexSetzen(4);
 
         box = new InfoBox();
         wurzel.add(box);
