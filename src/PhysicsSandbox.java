@@ -26,7 +26,6 @@ public class PhysicsSandbox
 extends Game
 implements KlickReagierbar {
 
-
     /**
      * Textbox für Infos
      */
@@ -116,6 +115,7 @@ implements KlickReagierbar {
     private Raum attack;
     private Geometrie[] walls = new Geometrie[NUMER_OF_TESTOBJECTS];
 
+    private Knoten fixierungsGruppe;
 
     private Rechteck stange;
     private InfoBox  box;
@@ -148,21 +148,29 @@ implements KlickReagierbar {
         rechteck.physik.typ(Physik.Typ.DYNAMISCH);
         testObjects[0] = rechteck;
 
+        fixierungsGruppe = new Knoten();
+        wurzel.add(fixierungsGruppe);
+
+
         Kreis kreis = new Kreis(10, 10, 50);
-        wurzel.add(kreis);
+        //wurzel.add(kreis);
+        fixierungsGruppe.add(kreis);
         kreis.setColor("Lila");
         kreis.physik.typ(Physik.Typ.DYNAMISCH);
         testObjects[1] = kreis;
 
-        Kreis kreis2 = new Kreis(10,10, 20);
-        wurzel.add(kreis2);
+        Kreis kreis2 = new Kreis(0,0, 20);
+        //wurzel.add(kreis2);
+        fixierungsGruppe.add(kreis2);
         kreis2.setColor("gruen");
         kreis2.physik.typ(Physik.Typ.DYNAMISCH);
+        //kreis2.physik.masse(50);
         testObjects[2] = kreis2;
 
         Polygon polygon = new Polygon(new Punkt(0,0), new Punkt(20, 30), new Punkt(10, 50),
                 new Punkt(80, 10), new Punkt(120, 0));
         wurzel.add(polygon);
+        //fixierungsGruppe.add(polygon);
         polygon.setColor("blau");
         polygon.physik.typ(Physik.Typ.DYNAMISCH);
         testObjects[3] = polygon;
@@ -310,11 +318,12 @@ implements KlickReagierbar {
             case Taste._2: //Zoom In
                 kamera.zoomSetzen(kamera.getZoom()+0.1f);
                 break;
-            case Taste.Z:
-                System.out.println("Zoom: " + kamera.getZoom());
-                break;
-            case Taste.P:
-                kamera.verschieben(new Vektor(50, 50));
+            case Taste.B: //Toggle die Kreisfixierung
+                if(fixierungsGruppe.isFixated()) {
+                    fixierungsGruppe.freeAllElements();
+                } else {
+                    fixierungsGruppe.fixateAllElements();
+                }
                 break;
         }
     }

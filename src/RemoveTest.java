@@ -8,6 +8,7 @@ extends Game{
 
     public static void main(String[] args) {
         new RemoveTest();
+        EngineAlpha.setVerbose(true);
     }
 
     private Kreis ball;
@@ -16,6 +17,8 @@ extends Game{
 
     public RemoveTest() {
         super(1200, 820, "EA Remove Test");
+
+        Rechteck r = new Rechteck(0,0, 200, 200);
     }
 
     @Override
@@ -42,7 +45,6 @@ extends Game{
             final Raum thisBlock = blocks[i];
             final int index = i;
             anmelden.kollisionsReagierbar(raum->{
-                System.out.println("Collision " + index);
                 wurzel.entfernen(thisBlock);
             }, blocks[i]);
         }
@@ -59,6 +61,9 @@ extends Game{
         switch (code) {
             case Taste.S:
                 ball.physik.impulsWirken(new Vektor(10,0));
+                break;
+            case Taste.X: // Froce Garbage Collection
+                System.gc();
                 break;
         }
     }
