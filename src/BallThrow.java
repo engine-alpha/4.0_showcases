@@ -80,16 +80,18 @@ implements KollisionsReagierbar {
         //Den Ball erstellen
         ball = new Kreis(0,0, DURCHMESSER*PIXELPROMETER);
         wurzel.add(ball);
-        ball.farbeSetzen("Rot");
+        ball.setColor("Rot");
         ball.physik.typ(Physik.Typ.DYNAMISCH);
         ball.physik.masse(MASSE);
         ball.position.mittelpunktSetzen(ABSTAND_LINKS,
                 BODEN_TIEFE-(HOEHE_UEBER_BODEN*PIXELPROMETER + 0.5f*DURCHMESSER*PIXELPROMETER));
 
+        //kamera.fokusSetzen(ball);
+
         //Den Boden erstellen
         boden=new Rechteck(0,BODEN_TIEFE, 20000,20);
         wurzel.add(boden);
-        boden.farbeSetzen("Weiss");
+        boden.setColor("Weiss");
         boden.physik.typ(Physik.Typ.STATISCH);
 
         //Kollision zwischen Ball und Boden beobachten (Code ist uns egal, wir kennen nur einen Kollisionsfall)

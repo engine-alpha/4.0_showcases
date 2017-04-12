@@ -161,7 +161,7 @@ implements KlickReagierbar {
         testObjects[2] = kreis2;
 
         Polygon polygon = new Polygon(new Punkt(0,0), new Punkt(20, 30), new Punkt(10, 50),
-                new Punkt(80, 10));
+                new Punkt(80, 10), new Punkt(120, 0));
         wurzel.add(polygon);
         polygon.setColor("blau");
         polygon.physik.typ(Physik.Typ.DYNAMISCH);
@@ -271,7 +271,7 @@ implements KlickReagierbar {
                 hatSchwerkraft = !hatSchwerkraft;
                 for(Raum testObject : testObjects) {
                     testObject.physik.schwerkraft(hatSchwerkraft ?
-                            ERDBESCHLEUNIGUNG.multiplizieren(testObject.physik.masse()) : Vektor.NULLVEKTOR);
+                            ERDBESCHLEUNIGUNG : Vektor.NULLVEKTOR);
                 }
                 //System.out.println("Schwerkraft: " + hatSchwerkraft + " - ");
                 break;
