@@ -38,7 +38,6 @@ public class ForceKlickEnvironment
 
     @Override
     public void kollision(Raum colliding) {
-        System.out.println("COl");
         attackedLast = colliding;
     }
 
@@ -46,7 +45,6 @@ public class ForceKlickEnvironment
     public void kollisionBeendet(Raum colliding) {
         if(attackedLast == colliding)
             attackedLast = null;
-        System.out.println("Out");
     }
 
     /**
@@ -184,7 +182,7 @@ public class ForceKlickEnvironment
                 Vektor distance = lastAttack.nach(p);
 
                 if(attackedLast != null && attackedLast.physik.typ() == Physik.Typ.DYNAMISCH) {
-                    attackedLast.physik.impulsWirken(distance.multiplizieren(10), lastAttack);
+                    attackedLast.physik.impulsWirken(distance.multiplizieren(1), lastAttack);
                     attackedLast = null;
                 }
 

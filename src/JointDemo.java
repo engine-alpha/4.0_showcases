@@ -10,6 +10,8 @@ import org.jbox2d.dynamics.joints.*;
 public class JointDemo
 extends ForceKlickEnvironment {
 
+    private boolean schwerkraftActive=false;
+
     public static void main(String[] args) {
         new JointDemo();
     }
@@ -18,6 +20,10 @@ extends ForceKlickEnvironment {
     private Rechteck wippe;
     private Polygon  basis;
 
+
+    private Rechteck[] kette;
+
+
     private Kreis ball;
 
     /**
@@ -25,12 +31,15 @@ extends ForceKlickEnvironment {
      */
     public JointDemo() {
         super(1200, 820, "EA - Joint Demo", false);
+        ppmSetzen(100);
     }
 
     @Override
     public void initialisieren() {
         super.initialisieren();
-        wippeBauen().position.set(new Punkt(500, 500));
+        //wippeBauen().position.set(new Punkt(500, 500));
+
+        ketteBauen(15).position.verschieben(new Vektor(300, 00));
 
 
         ball = new Kreis(0, 0, 100);
@@ -59,9 +68,47 @@ extends ForceKlickEnvironment {
 
         wippe.setColor("Grau");
 
-        wippe.physik.createRevoluteJoint(basis, new Vektor(50, 0));
+        Vektor verzug = new Vektor(100,100);
+
+        wippe.position.verschieben(verzug);
+        basis.position.verschieben(verzug);
+
+        wippe.physik.createRevoluteJoint(basis, new Vektor(50, 0).summe(verzug));
 
         return bauwerk;
+    }
+
+    private Knoten ketteBauen(int kettenlaenge) {
+        Knoten ketteK = new Knoten();
+        wurzel.add(ketteK);
+
+        kette = new Rechteck[kettenlaenge];
+        for(int i = 0; i < kette.length; i++) {
+            kette[i] = new Rechteck(0, 0, 50, 10);
+            Vektor posrel = new Vektor(45*i,30);
+            ketteK.add(kette[i]);
+            kette[i].position.verschieben(posrel);
+            kette[i].setColor("Gruen");
+
+            kette[i].physik.typ(i == 0 ? Physik.Typ.STATISCH : Physik.Typ.DYNAMISCH);
+
+            if(i != 0) {
+                kette[i-1].physik.createRevoluteJoint(kette[i], new Vektor(0, 0).summe(posrel));
+            }
+        }
+
+        Kreis gewicht = new Kreis(0, 0, 100);
+        ketteK.add(gewicht);
+        gewicht.setColor("Weiss");
+
+        gewicht.physik.typ(Physik.Typ.DYNAMISCH);
+        gewicht.physik.masse(40);
+
+        Vektor vektor = new Vektor(45*kette.length, 35);
+        gewicht.position.mittelpunktSetzen(new Punkt(vektor.realX(), vektor.realY()));
+        gewicht.physik.createRevoluteJoint(kette[kette.length-1], vektor);
+
+        return ketteK;
     }
 
     @Override
@@ -69,7 +116,8 @@ extends ForceKlickEnvironment {
         super.tasteReagieren(code);
         switch(code){
             case  Taste.S:
-                ball.physik.impulsWirken(new Vektor(0, 10));
+                ball.physik.schwerkraft(schwerkraftActive ? new Vektor(0, 10) : Vektor.NULLVEKTOR);
+                schwerkraftActive = !schwerkraftActive;
                 break;
         }
     }
