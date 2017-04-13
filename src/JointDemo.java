@@ -1,7 +1,10 @@
 import ea.*;
 
+import ea.Polygon;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.dynamics.joints.*;
+
+import java.awt.*;
 
 /**
  * Einfaches Programm zur Demonstration von Joints in der Engine
@@ -31,16 +34,18 @@ extends ForceKlickEnvironment {
      */
     public JointDemo() {
         super(1200, 820, "EA - Joint Demo", false);
-        ppmSetzen(100);
     }
 
     @Override
     public void initialisieren() {
         super.initialisieren();
-        //wippeBauen().position.set(new Punkt(500, 500));
+        wippeBauen().position.set(new Punkt(500, 500));
 
-        ketteBauen(15).position.verschieben(new Vektor(300, 00));
+        ketteBauen(15).position.verschieben(new Vektor(500, 00));
 
+        leashBauen().position.verschieben(100,100);
+
+        hoverHolderBauen();
 
         ball = new Kreis(0, 0, 100);
         wurzel.add(ball);
@@ -49,6 +54,61 @@ extends ForceKlickEnvironment {
 
         ball.position.set(new Punkt(300, 200));
         ball.physik.typ(Physik.Typ.DYNAMISCH);
+    }
+
+    private Knoten hoverHolderBauen() {
+        Knoten knoten = new Knoten();
+        wurzel.add(knoten);
+
+        final int FACT = 2;
+
+        Polygon halter = new Polygon(
+                new Punkt(0*FACT,50*FACT), new Punkt(25*FACT, 75*FACT),
+                new Punkt(50*FACT, 75*FACT), new Punkt(75*FACT, 50*FACT),
+                new Punkt(75*FACT, 100*FACT), new Punkt(0*FACT,100*FACT)
+        );
+        knoten.add(halter);
+        halter.setColor("cyan");
+        halter.physik.typ(Physik.Typ.DYNAMISCH);
+
+        Rechteck item = new Rechteck(30*FACT, 0, 35*FACT, 20*FACT);
+        knoten.add(item);
+        item.setColor(Color.red);
+        item.physik.typ(Physik.Typ.DYNAMISCH);
+
+
+        knoten.position.verschieben(new Vektor(160, 200));
+
+        halter.physik.createDistanceJoint(item, halter.position.mittelPunkt().alsVektor(), item.position.mittelPunkt().alsVektor());
+
+
+        return knoten;
+    }
+
+    private Knoten leashBauen() {
+        Knoten knoten = new Knoten();
+        wurzel.add(knoten);
+
+        Kreis kx = new Kreis(0,0, 30);
+        knoten.add(kx);
+        kx.setColor("Blau");
+        kx.physik.typ(Physik.Typ.DYNAMISCH);
+
+        Kreis ky = new Kreis(50, 0, 50);
+        knoten.add(ky);
+        ky.setColor("Gruen");
+        ky.physik.typ(Physik.Typ.DYNAMISCH);
+
+        knoten.position.verschieben(500,500);
+
+
+        kx.physik.createRopeJoint(ky,
+                //kx.position.mittelPunkt().alsVektor(),
+                //ky.position.mittelPunkt().alsVektor(), 4);
+                new Vektor(15,15),
+                new Vektor(25,25), 4);
+
+        return knoten;
     }
 
     private Knoten wippeBauen() {
@@ -93,7 +153,8 @@ extends ForceKlickEnvironment {
             kette[i].physik.typ(i == 0 ? Physik.Typ.STATISCH : Physik.Typ.DYNAMISCH);
 
             if(i != 0) {
-                kette[i-1].physik.createRevoluteJoint(kette[i], new Vektor(0, 0).summe(posrel));
+                RevoluteJoint rj = kette[i-1].physik.createRevoluteJoint(kette[i], new Vektor(0, 5).summe(posrel));
+
             }
         }
 
@@ -116,8 +177,8 @@ extends ForceKlickEnvironment {
         super.tasteReagieren(code);
         switch(code){
             case  Taste.S:
-                ball.physik.schwerkraft(schwerkraftActive ? new Vektor(0, 10) : Vektor.NULLVEKTOR);
                 schwerkraftActive = !schwerkraftActive;
+                ball.physik.schwerkraft(schwerkraftActive ? new Vektor(0, 10) : Vektor.NULLVEKTOR);
                 break;
         }
     }

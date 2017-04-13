@@ -60,11 +60,12 @@ public class ForceKlickEnvironment
 
     private Raum attackedLast = null;
 
-
     private Rechteck stange;
     private KlickMode klickMode = KlickMode.ATTACK_POINT;
     private Punkt lastAttack;
     private boolean hatSchwerkraft = false;
+
+    public static int PPM=100;
 
     /**
      * Startet ein Sandbox-Fenster.
@@ -80,7 +81,7 @@ public class ForceKlickEnvironment
      */
     @Override
     public void initialisieren() {
-
+        ppmSetzen(PPM);
         //Info-Message
         //fenster.nachrichtSchicken("Elastizität +[W]/-[Q] | Masse +[U] / -[J] | [R]eset | [S]chwerkraft | [E]insperren");
 
@@ -122,8 +123,6 @@ public class ForceKlickEnvironment
         attack = atv;
         attack.zIndexSetzen(4);
 
-
-
         //Maus erstellen, Listener Anmelden.
         maus.standardCursorSetzen(Maus.TYP_FADENKREUZ);
         maus.klickReagierbarAnmelden(this);
@@ -140,13 +139,14 @@ public class ForceKlickEnvironment
             case Taste.E:
                 boolean wasActive = walls[1].sichtbar();
                 Physik.Typ newType = wasActive ? Physik.Typ.PASSIV : Physik.Typ.STATISCH;
-                for(int i = 1; i <= 3; i++) {
+                for(int i = 0; i <= 3; i++) {
                     walls[i].sichtbarSetzen(!wasActive);
                     walls[i].physik.typ(newType);
                 }
                 break;
         }
     }
+
 
 
     /**
