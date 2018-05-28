@@ -1,3 +1,5 @@
+package ea.showcase;
+
 import ea.*;
 
 /**
